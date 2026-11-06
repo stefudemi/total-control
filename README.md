@@ -9,7 +9,26 @@ Python · Django · Django REST Framework · PostgreSQL · React · JavaScript �
 Python 3.11+, Node.js 20+, PostgreSQL 15+.
 
 ## Instalación y ejecución
-_Se completará al finalizar la configuración del backend (Etapa 1) y del frontend (Etapa 2)._
+### Backend
+```bash
+cd backend
+python -m venv .venv
+.venv\Scriptsctivate          # Windows
+pip install -r requirements.txt
+copy .env.example .env           # completar SECRET_KEY y DB_PASSWORD
+python manage.py migrate
+python manage.py createsuperuser
+python manage.py runserver
+python manage.py test            # ejecutar tests
+```
+### Base de datos
+Crear en PostgreSQL el rol y la base:
+```sql
+CREATE ROLE total_control LOGIN PASSWORD 'tu_clave' CREATEDB;
+CREATE DATABASE total_control OWNER total_control;
+```
+### Frontend
+_Se completará en la Etapa 2._
 
 ## Funcionalidades (MVP)
 Gestión de canchas · Gestión de turnos sin superposición · Clientes · Panel administrativo · Autenticación de staff.
