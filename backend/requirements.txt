@@ -1,0 +1,7 @@
+coverage==7.17.2
+Django==5.2.19
+django-cors-headers==4.9.0
+djangorestframework==3.18.3
+psycopg==3.3.8
+psycopg-binary==3.3.8
+python-decouple==3.8
