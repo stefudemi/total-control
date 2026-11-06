@@ -1,0 +1,54 @@
+from rest_framework import mixins, viewsets
+from rest_framework.decorators import action
+from rest_framework.response import Response
+
+from .models import Court
+from .serializers import AvailabilityQuerySerializer, CourtSerializer
+from .services import get_day_slots
+
+
+class CourtViewSet(
+    mixins.CreateModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.UpdateModelMixin,
+    mixins.ListModelMixin,
+    viewsets.GenericViewSet,
+):
+    """CRUD de canchas (sin borrado: se desactivan)."""
+
+    queryset = Court.objects.all()
+    serializer_class = CourtSerializer
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        active = self.request.query_params.get('active')
+        if active is not None:
+            qs = qs.filter(is_active=active.lower() in ('1', 'true'))
+        return qs
+
+    def _set_active(self, value):
+        court = self.get_object()
+        court.is_active = value
+        court.save(update_fields=['is_active', 'updated_at'])
+        return Response(self.get_serializer(court).data)
+
+    @action(detail=True, methods=['post'])
+    def activate(self, request, pk=None):
+        return self._set_active(True)
+
+    @action(detail=True, methods=['post'])
+    def deactivate(self, request, pk=None):
+        return self._set_active(False)
+
+    @action(detail=True, methods=['get'])
+    def availability(self, request, pk=None):
+        court = self.get_object()
+        query = AvailabilityQuerySerializer(data=request.query_params)
+        query.is_valid(raise_exception=True)
+        day = query.validated_data['date']
+        return Response({
+            'court': court.id,
+            'date': day,
+            'is_active': court.is_active,
+            'slots': get_day_slots(court, day),
+        })
