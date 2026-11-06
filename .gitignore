@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+# Entorno / secretos
+.env
+*.env
+!.env.example
+# Django
+*.sqlite3
+staticfiles/
+media/
+# Node
+node_modules/
+dist/
+# IDE / SO
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+.coverage
+htmlcov/
