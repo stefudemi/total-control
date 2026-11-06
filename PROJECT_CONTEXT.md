@@ -18,11 +18,15 @@ Python 3.11, Django, DRF, PostgreSQL 18 (local, servicio `postgresql-x64-18`), R
 Court 1—N Booking · Client 1—N Booking · User 1—N Booking (created_by). Ver ER en `docs/MODELO_DATOS.md`.
 
 ## Endpoints implementados
-_Ninguno todavía._
+Todos bajo `/api/` y requieren autenticación.
+- `GET/POST /api/courts/` (filtro `?active=true|false`)
+- `GET/PUT/PATCH /api/courts/{id}/` (sin DELETE: se desactivan)
+- `POST /api/courts/{id}/activate/` · `POST /api/courts/{id}/deactivate/`
+- `GET /api/courts/{id}/availability/?date=YYYY-MM-DD` (turnos de 30 min; aún sin descontar reservas)
 
 ## Funcionalidades
-- Completadas: Etapa 0 (documentación de diseño).
-- Pendientes: todo el backend (canchas → auth → clientes → turnos), frontend, integración.
+- Completadas: Etapa 0 (diseño); Etapa 1.1 módulo Canchas (modelo, API, servicio de disponibilidad, 15 tests, ~99 % cobertura).
+- Pendientes: autenticación (login por token), clientes, turnos, RN7 (no desactivar cancha con reservas futuras), frontend, integración.
 
 ## Decisiones técnicas
 - Auth por token DRF (nativo). Roles con `is_staff` / grupo Empleados.
@@ -35,7 +39,7 @@ _Ninguno todavía._
 - Se necesitan credenciales de PostgreSQL del usuario (se guardan en `backend/.env`, no versionado).
 
 ## Estado actual
-Etapa 0 completa. Iniciando Etapa 1, módulo Canchas.
+Módulo Canchas completo y probado.
 
 ## Próximo paso concreto
-Crear entorno virtual, proyecto Django `config`, configurar PostgreSQL por variables de entorno y app `courts`.
+Crear app `accounts`: `rest_framework.authtoken`, endpoints login/logout/me, grupo Empleados y tests.
