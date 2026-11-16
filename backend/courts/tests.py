@@ -117,3 +117,26 @@ class CourtAPITests(APITestCase):
         self.assertEqual(res.status_code, 400)
         res = self.client.get(f'{self.url}{court.id}/availability/')
         self.assertEqual(res.status_code, 400)
+
+
+class CourtPermissionTests(APITestCase):
+    url = '/api/courts/'
+
+    def setUp(self):
+        from accounts.tests import make_employee
+        self.client.force_authenticate(make_employee())
+
+    def test_empleado_puede_leer_y_ver_disponibilidad(self):
+        court = make_court()
+        self.assertEqual(self.client.get(self.url).status_code, 200)
+        self.assertEqual(self.client.get(f'{self.url}{court.id}/').status_code, 200)
+        res = self.client.get(f'{self.url}{court.id}/availability/', {'date': '2030-05-01'})
+        self.assertEqual(res.status_code, 200)
+
+    def test_empleado_no_puede_crear_editar_ni_desactivar(self):
+        court = make_court()
+        payload = {'name': 'X', 'court_type': 'covered', 'opening_time': '09:00', 'closing_time': '23:00'}
+        self.assertEqual(self.client.post(self.url, payload, format='json').status_code, 403)
+        self.assertEqual(self.client.patch(f'{self.url}{court.id}/', {'name': 'Y'}).status_code, 403)
+        self.assertEqual(self.client.post(f'{self.url}{court.id}/deactivate/').status_code, 403)
+        self.assertEqual(self.client.post(f'{self.url}{court.id}/activate/').status_code, 403)
