@@ -41,8 +41,10 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     # Terceros
     'rest_framework',
+    'rest_framework.authtoken',
     'corsheaders',
     # Apps del proyecto
+    'accounts',
     'courts',
 ]
 
