@@ -1,4 +1,4 @@
-from rest_framework import mixins, viewsets
+from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
@@ -6,7 +6,7 @@ from accounts.permissions import IsAdminOrReadOnlyStaff
 
 from .models import Court
 from .serializers import AvailabilityQuerySerializer, CourtSerializer
-from .services import get_day_slots
+from .services import CourtError, deactivate_court, get_day_slots
 
 
 class CourtViewSet(
@@ -29,19 +29,21 @@ class CourtViewSet(
             qs = qs.filter(is_active=active.lower() in ('1', 'true'))
         return qs
 
-    def _set_active(self, value):
+    @action(detail=True, methods=['post'])
+    def activate(self, request, pk=None):
         court = self.get_object()
-        court.is_active = value
+        court.is_active = True
         court.save(update_fields=['is_active', 'updated_at'])
         return Response(self.get_serializer(court).data)
 
     @action(detail=True, methods=['post'])
-    def activate(self, request, pk=None):
-        return self._set_active(True)
-
-    @action(detail=True, methods=['post'])
     def deactivate(self, request, pk=None):
-        return self._set_active(False)
+        court = self.get_object()
+        try:
+            deactivate_court(court)
+        except CourtError as exc:
+            return Response({'detail': str(exc)}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(self.get_serializer(court).data)
 
     @action(detail=True, methods=['get'])
     def availability(self, request, pk=None):
