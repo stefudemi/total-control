@@ -2,6 +2,8 @@ from rest_framework import mixins, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
+from accounts.permissions import IsAdminOrReadOnlyStaff
+
 from .models import Court
 from .serializers import AvailabilityQuerySerializer, CourtSerializer
 from .services import get_day_slots
@@ -18,6 +20,7 @@ class CourtViewSet(
 
     queryset = Court.objects.all()
     serializer_class = CourtSerializer
+    permission_classes = [IsAdminOrReadOnlyStaff]
 
     def get_queryset(self):
         qs = super().get_queryset()
