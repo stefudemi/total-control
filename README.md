@@ -18,6 +18,7 @@ pip install -r requirements.txt
 copy .env.example .env           # completar SECRET_KEY y DB_PASSWORD
 python manage.py migrate
 python manage.py createsuperuser
+python manage.py seed_demo         # datos de demo (requiere DEMO_PASSWORD en .env)
 python manage.py runserver
 python manage.py test            # ejecutar tests
 ```
@@ -27,6 +28,12 @@ Crear en PostgreSQL el rol y la base:
 CREATE ROLE total_control LOGIN PASSWORD 'tu_clave' CREATEDB;
 CREATE DATABASE total_control OWNER total_control;
 ```
+Las reservas usan una restricción de exclusión que requiere la extensión `btree_gist`; la migración de `bookings` la crea con `CREATE EXTENSION` (PostgreSQL 13+ la permite al dueño de la base, sin superusuario).
+
+`seed_demo` es idempotente: crea 4 canchas, 15 clientes, reservas de la semana y el empleado `empleado_demo` (contraseña = `DEMO_PASSWORD`).
+
+Contrato de la API: [docs/API.md](docs/API.md).
+
 ### Frontend
 _Se completará en la Etapa 2._
 

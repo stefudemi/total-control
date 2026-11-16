@@ -18,28 +18,38 @@ Python 3.11, Django, DRF, PostgreSQL 18 (local, servicio `postgresql-x64-18`), R
 Court 1—N Booking · Client 1—N Booking · User 1—N Booking (created_by). Ver ER en `docs/MODELO_DATOS.md`.
 
 ## Endpoints implementados
-Todos bajo `/api/` y requieren autenticación.
-- `GET/POST /api/courts/` (filtro `?active=true|false`)
-- `GET/PUT/PATCH /api/courts/{id}/` (sin DELETE: se desactivan)
-- `POST /api/courts/{id}/activate/` · `POST /api/courts/{id}/deactivate/`
-- `GET /api/courts/{id}/availability/?date=YYYY-MM-DD` (turnos de 30 min; aún sin descontar reservas)
+Todos bajo `/api/` y requieren token (`Authorization: Token ...`), salvo login. Contrato completo: `docs/API.md`.
+- Auth: `POST auth/login/` · `POST auth/logout/` · `GET auth/me/`
+- Usuarios (solo admin): `users/` (list/create/retrieve/update) · `users/{id}/activate|deactivate/`
+- Canchas: lectura y `availability` para todo el personal; crear/editar/activar/desactivar solo admin. `deactivate` aplica RN7.
+- Clientes: `clients/` (paginado, `?search=`) · `clients/{id}/` · `clients/{id}/bookings/`
+- Reservas: `bookings/` (filtros `date`, `court`, `client`, `status`) · `bookings/{id}/` · `bookings/{id}/cancel/`
+- Agenda: `agenda/?date=`
 
 ## Funcionalidades
-- Completadas: Etapa 0 (diseño); Etapa 1.1 módulo Canchas (modelo, API, servicio de disponibilidad, 15 tests, ~99 % cobertura).
-- Pendientes: autenticación (login por token), clientes, turnos, RN7 (no desactivar cancha con reservas futuras), frontend, integración.
+- Completadas: Etapa 0 (diseño); canchas; accounts (RF01, RF02); clientes (RF07, RF08); reservas (RF09–RF12, RF14); agenda (RF13); RN1–RN9; `seed_demo`. 82 tests, `services.py` al 100 % de cobertura.
+- Pendientes: frontend e integración.
 
 ## Decisiones técnicas
-- Auth por token DRF (nativo). Roles con `is_staff` / grupo Empleados.
-- Anti-superposición: validación en servicio + `ExclusionConstraint` PostgreSQL.
-- Cliente se crea/reutiliza desde la reserva (por teléfono).
+- Auth por token DRF (nativo). Admin = `is_staff`; empleado = usuario activo del grupo "Empleados" (creado por data migration). Usuarios nuevos quedan en ese grupo.
+- Anti-superposición: validación en servicio (con `select_for_update` de la cancha) + `ExclusionConstraint` PostgreSQL (`btree_gist`, rango `[)`, solo confirmadas). Un `IntegrityError` se traduce al mismo error de superposición.
+- Cliente se crea/reutiliza desde la reserva (por teléfono); si el teléfono existe se reutiliza el cliente sin modificar sus datos.
+- Errores de reglas de negocio: `400 {"detail": "..."}` (`BookingError` / `CourtError` en los servicios).
+- `start_at` entra sin offset y se interpreta en America/Argentina/Buenos_Aires; `MAX_DURATION_MINUTES` (180) en settings.
+- Teléfono: se normaliza a dígitos y `+` inicial; debe tener 6–15 dígitos. Búsqueda de clientes con `SearchFilter` (el término se compara tal cual contra el teléfono normalizado).
+- RN5: "pasado" = `start_at < ahora`. RN7: "futuras" = `start_at > ahora`, solo confirmadas.
+- Desactivar un usuario borra su token. Un admin no puede desactivarse a sí mismo.
+- Paginación solo en clientes (20 por página); el resto devuelve listas simples.
+- `seed_demo` usa semilla fija y omite reservas que ya existen, estén en el pasado o se superpongan; empleado `empleado_demo` con `DEMO_PASSWORD`.
 - Commits en español, Conventional Commits, pequeños y frecuentes.
 
 ## Problemas conocidos
 - `psql` no está en el PATH (está en `C:\Program Files\PostgreSQL\18\bin`).
+- Para `seed_demo` hay que definir `DEMO_PASSWORD` en `backend/.env`.
 - Se necesitan credenciales de PostgreSQL del usuario (se guardan en `backend/.env`, no versionado).
 
 ## Estado actual
-Módulo Canchas completo y probado.
+Backend completo para el Informe de Avance 2 (rama `feature/backend-informe-2`), probado.
 
 ## Próximo paso concreto
-Crear app `accounts`: `rest_framework.authtoken`, endpoints login/logout/me, grupo Empleados y tests.
+Frontend (React/Vite) consumiendo `docs/API.md`; luego integración.

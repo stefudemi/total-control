@@ -122,11 +122,11 @@ Errores `400 {"detail": "..."}` (en este orden de validación):
 
 | Regla | Mensaje (ejemplo) |
 |---|---|
-| RN3 | `La cancha está inactiva.` |
-| RN4 | `La duración debe ser múltiplo de 30 minutos, entre 30 y 180.` / `El horario de inicio debe ser en punto o y media.` |
+| RN3 | `La cancha está inactiva y no admite reservas.` |
+| RN4 | `La duración debe ser múltiplo de 30 minutos, entre 30 y 180.` / `El horario de inicio debe ser en punto o y media (:00 o :30).` |
 | RN5 | `No se puede reservar en el pasado.` |
 | RN8 | `La reserva debe estar dentro del horario de la cancha (09:00 a 23:00).` |
-| RN2 | `La cancha ya está reservada de 18:00 a 19:30.` |
+| RN2 | `La cancha ya está reservada el 01/05/2030 de 18:00 a 19:30.` |
 
 Campos faltantes o mal formados → `400 {"campo": [...]}`.
 

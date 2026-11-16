@@ -5,6 +5,7 @@
 ```mermaid
 erDiagram
     USER ||--o{ BOOKING : "crea (created_by)"
+    USER ||--o{ BOOKING : "cancela (cancelled_by)"
     COURT ||--o{ BOOKING : "tiene"
     CLIENT ||--o{ BOOKING : "realiza"
 
@@ -33,6 +34,7 @@ erDiagram
         string phone
         string email "opcional"
         datetime created_at
+        datetime updated_at
     }
     BOOKING {
         int id PK
@@ -44,6 +46,8 @@ erDiagram
         datetime end_at "calculado"
         string status "confirmed / cancelled"
         string notes
+        int cancelled_by_id FK "nullable"
+        datetime cancelled_at "nullable"
         datetime created_at
         datetime updated_at
     }
@@ -52,12 +56,13 @@ erDiagram
 ## Relaciones
 - **Court 1—N Booking**: una cancha tiene muchas reservas (`on_delete=PROTECT`).
 - **Client 1—N Booking**: un cliente puede tener muchas reservas (`PROTECT`).
-- **User 1—N Booking**: auditoría de quién creó la reserva (`SET_NULL`).
+- **User 1—N Booking**: auditoría de quién creó (`created_by`) y quién canceló (`cancelled_by`, con `cancelled_at`) la reserva (`SET_NULL`).
 - Cliente se registra dentro del flujo de reserva: se busca por teléfono y, si no existe, se crea (`get_or_create` en el servicio).
 
 ## Restricciones
 - `Court.name` único.
 - `Court`: `opening_time < closing_time`.
-- `Booking`: `duration_minutes` múltiplo de 30 y > 0; `end_at > start_at`.
+- `Client.phone` único, normalizado (solo dígitos y `+` inicial).
+- `Booking`: `duration_minutes` > 0 y `end_at > start_at` (CheckConstraints); el múltiplo de 30 y el máximo se validan en el servicio (RN4). `end_at` se persiste.
 - `Booking`: `ExclusionConstraint` PostgreSQL: no hay dos filas con la misma `court` y rangos `[start_at, end_at)` solapados cuando `status='confirmed'` (requiere extensión `btree_gist`).
 - Índices: `(court, start_at)`, `start_at`.
