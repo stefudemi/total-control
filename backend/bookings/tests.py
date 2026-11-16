@@ -469,3 +469,24 @@ class CourtDeactivationRN7Tests(APITestCase):
         res = self.client.post(self.url())
         self.assertEqual(res.status_code, 200)
         self.assertFalse(res.data['is_active'])
+
+
+class SeedDemoTests(TestCase):
+    def test_seed_demo_es_idempotente(self):
+        from django.core.management import call_command
+
+        with mock.patch.dict('os.environ', {'DEMO_PASSWORD': 'Demo-clave-2026'}):
+            call_command('seed_demo', stdout=mock.MagicMock())
+            counts = (Booking.objects.count(), Client.objects.count(), Court.objects.count())
+            call_command('seed_demo', stdout=mock.MagicMock())
+        self.assertEqual(counts, (Booking.objects.count(), Client.objects.count(), Court.objects.count()))
+        self.assertEqual(Court.objects.count(), 4)
+        self.assertEqual(Client.objects.count(), 15)
+        self.assertGreater(Booking.objects.count(), 0)
+
+    def test_seed_demo_exige_password(self):
+        from django.core.management import CommandError, call_command
+
+        with mock.patch.dict('os.environ', {'DEMO_PASSWORD': ''}):
+            with self.assertRaises(CommandError):
+                call_command('seed_demo')
