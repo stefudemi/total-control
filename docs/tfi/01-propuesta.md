@@ -19,6 +19,3 @@ Ver `docs/ARQUITECTURA.md` §4.
 
 ## Stack tecnológico
 Django + DRF + PostgreSQL + React (justificación en `docs/ARQUITECTURA.md` §6).
-
-## Plan de trabajo
-Ver `docs/ROADMAP.md`.
