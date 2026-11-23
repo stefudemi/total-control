@@ -39,11 +39,16 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.postgres',
     # Terceros
     'rest_framework',
+    'rest_framework.authtoken',
     'corsheaders',
     # Apps del proyecto
+    'accounts',
     'courts',
+    'clients',
+    'bookings',
 ]
 
 MIDDLEWARE = [
@@ -144,3 +149,6 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.SessionAuthentication',
     ],
 }
+
+# Reservas: duración máxima permitida (RN4)
+MAX_DURATION_MINUTES = config('MAX_DURATION_MINUTES', default=180, cast=int)
