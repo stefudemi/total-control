@@ -38,7 +38,7 @@ Contrato de la API: [docs/API.md](docs/API.md).
 _Se completará en la Etapa 2._
 
 ## Funcionalidades (MVP)
-Gestión de canchas · Gestión de turnos sin superposición · Clientes · Panel administrativo · Autenticación de staff.
+Gestión de canchas • Gestión de turnos sin superposición • Clientes • Panel administrativo • Autenticación de staff.
 
 ## Documentación
 - [Arquitectura](docs/ARQUITECTURA.md) · [Modelo de datos](docs/MODELO_DATOS.md) · [Roadmap](docs/ROADMAP.md)
